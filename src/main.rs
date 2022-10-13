@@ -19,13 +19,16 @@ impl EventHandler for Handler {}
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+    
+
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("~"))
         .group(&GENERAL_GROUP);
     //Login with a bot token from the environment
     let token = env::var("DISCORDBOTTOKEN").expect("token");
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
-    let mut client = Client.builder(token, intents)
+    let mut client = Client::builder(token, intents)
         .event_handler(Handler)
         .framework(framework)
         .await
