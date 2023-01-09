@@ -22,12 +22,6 @@ use serenity::{
 
 use serde::{Deserialize, Serialize};
 
-/*use serenity::async_trait;
-use serenity::prelude::*;
-use serenity::model::channel::Message;
-use serenity::framework::standard::macros::{command, group};
-use serenity::framework::standard::{StandardFramework, CommandResult};*/
-
 #[derive(Debug, Serialize, Deserialize, Collection)]
 #[collection(name = "tickets")]
 struct Ticket {
