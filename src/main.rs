@@ -1,11 +1,41 @@
 use std::env;
+use std::time::SystemTime;
 use dotenv::dotenv;
 
-use serenity::async_trait;
+use bonsaidb::{
+    core::schema::{Collection, SerializedCollection},
+    local::{
+        config::{Builder, StorageConfiguration},
+        Database,
+    },
+};
+
+use serenity::{
+    async_trait,
+    prelude::*,
+    model::channel::Message,
+    framework::standard::{
+        macros::{command, group},
+        {StandardFramework, CommandResult},
+    },
+};
+
+use serde::{Deserialize, Serialize};
+
+/*use serenity::async_trait;
 use serenity::prelude::*;
 use serenity::model::channel::Message;
 use serenity::framework::standard::macros::{command, group};
-use serenity::framework::standard::{StandardFramework, CommandResult};
+use serenity::framework::standard::{StandardFramework, CommandResult};*/
+
+#[derive(Debug, Serialize, Deserialize, Collection)]
+#[collection(name = "tickets")]
+struct Ticket {
+    pub timestamp: SystemTime,
+    pub user: i32,
+    pub message: String,
+    pub status: String,
+}
 
 #[group]
 #[commands(ping)]
@@ -18,8 +48,18 @@ struct Handler;
 impl EventHandler for Handler {}
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), bonsaidb::core::Error> {
     dotenv().ok();
+
+    let db = Database::open::<Ticket>(StorageConfiguration::new("ticket.storage"))?;
+
+    let ticket = Ticket {
+        timestamp: SystemTime::now(),
+        user: 123,
+        message: String::from("Test ticket"),
+        status: String::from("New"),
+    }
+    .push_into(&db)?;
     
 
     let framework = StandardFramework::new()
@@ -39,6 +79,8 @@ async fn main() {
     if let Err(why) = client.start().await {
         println!("An error occured while running the client: {:?}", why);
     }
+
+    Ok(())
 
 }
 

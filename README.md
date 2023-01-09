@@ -3,4 +3,13 @@ My attempt at a Rust based Discord bot
 
 
 ## Supported Commands
-//TODO
+
+### Ping
+Replies with Pong
+
+### Tickets
+Commands related to tickets
+#### List
+Lists all tickets //Not implemented yet
+
+
