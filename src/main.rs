@@ -32,7 +32,7 @@ struct Ticket {
 }
 
 #[group]
-#[commands(ping)]
+#[commands(ping, list)]
 
 struct General;
 
@@ -82,6 +82,13 @@ async fn main() -> Result<(), bonsaidb::core::Error> {
 async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
     msg.reply(ctx, "Pong!").await?;
 
+
+    Ok(())
+}
+
+#[command]
+async fn list(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.reply(ctx, "Listing Tickets...").await?;
 
     Ok(())
 }
