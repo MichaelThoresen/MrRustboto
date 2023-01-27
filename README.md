@@ -1,6 +1,8 @@
 # MrRustboto
 My attempt at a Rust based Discord bot
 
+Dockerfile is not finished so do not use :)))))
+
 
 ## Supported Commands
 
