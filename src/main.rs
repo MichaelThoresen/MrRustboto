@@ -120,7 +120,7 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
 #[command]
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     
-    let tickets = ListOfTickets::entries(&db).with_key(&1).query()?;
+    let tickets = ListOfTickets::entries_async(&db).with_key(&1).query()?;
     println!("Number of tickets: {}", tickets.len());
     msg.reply(ctx, "Listing Tickets...").await?;
 
