@@ -2,7 +2,6 @@ use std::env;
 use std::time::SystemTime;
 use dotenv::dotenv;
 use rusqlite::{Connection,Result};
-use rusqlite::NO_PARAMS;
 
 
 use serenity::{
@@ -16,6 +15,14 @@ use serenity::{
 };
 
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug)]
+struct Ticket {
+    id: i32,
+    owner: String,
+    description: String,
+    status: String
+}
 
 #[group]
 #[commands(ping, list)]
@@ -31,7 +38,7 @@ impl EventHandler for Handler {}
 async fn main() -> Result<()> {
     dotenv().ok();
 
-    let conn = Connection.open("tickets.db")?;
+    let conn = Connection::open("tickets.db")?;
 
     conn.execute(
         "create table if not exists tickets (
@@ -40,7 +47,7 @@ async fn main() -> Result<()> {
             description text not null,
             status text not null
         )",
-        NO_PARAMS,
+        (),
     )?;
 
     let framework = StandardFramework::new()
@@ -73,9 +80,45 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
     Ok(())
 }
 
+
 #[command]
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     msg.reply(ctx, "Listing Tickets...").await?;
 
+    let conn = Connection::open("Tickets.db");
+
+    let stmt = conn.prepare("SELECT id, owner, description, status FROM tickets")?;
+    let ticket_iter = stmt.query_map([], |row| {
+        Ok(Ticket {
+            id: row.get(0)?,
+            owner: row.get(1)?,
+            description: row.get(2)?,
+            status: row.get(3)?,
+        })
+    })?;
+
+    for ticket in ticket_iter {
+        println!("Found ticket {:?}", ticket.unwrap());
+    }
+
     Ok(())
 }
+
+#[command]
+async fn test(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.reply(ctx, "Creating ticket...").await?;
+
+    let conn = Connection::open("Tickets.db");
+
+    let test = Ticket {
+        id: 0,
+        owner: "Unassigned".to_string(),
+        description: "Test ticket".to_string(),
+        status: "New".to_string()
+    };
+    conn.execute(
+        "INSERT INTO tickets (owner, description, status) VALUES (?1, ?2, ?3,)",
+        (&test.owner, &test.description, &test.status),
+    )?;
+}
+
