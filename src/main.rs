@@ -1,14 +1,9 @@
 use std::env;
 use std::time::SystemTime;
 use dotenv::dotenv;
+use rusqlite::{Connection,Result};
+use rusqlite::NO_PARAMS;
 
-use bonsaidb::{
-    core::schema::{Collection, SerializedCollection},
-    local::{
-        config::{Builder, StorageConfiguration},
-        Database,
-    },
-};
 
 use serenity::{
     async_trait,
@@ -22,15 +17,6 @@ use serenity::{
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Collection)]
-#[collection(name = "tickets")]
-struct Ticket {
-    pub timestamp: SystemTime,
-    pub user: i32,
-    pub message: String,
-    pub status: String,
-}
-
 #[group]
 #[commands(ping, list)]
 
@@ -42,19 +28,20 @@ struct Handler;
 impl EventHandler for Handler {}
 
 #[tokio::main]
-async fn main() -> Result<(), bonsaidb::core::Error> {
+async fn main() -> Result<()> {
     dotenv().ok();
 
-    let db = Database::open::<Ticket>(StorageConfiguration::new("ticket.storage"))?;
+    let conn = Connection.open("tickets.db")?;
 
-    let ticket = Ticket {
-        timestamp: SystemTime::now(),
-        user: 123,
-        message: String::from("Test ticket"),
-        status: String::from("New"),
-    }
-    .push_into(&db)?;
-    
+    conn.execute(
+        "create table if not exists tickets (
+            id integer primary key,
+            owner text not null,
+            description text not null,
+            status text not null
+        )",
+        NO_PARAMS,
+    )?;
 
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("~"))

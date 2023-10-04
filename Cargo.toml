@@ -11,3 +11,4 @@ tokio = {version = "*", features = ["full"] }
 dotenv = "*"
 bonsaidb = { version = "0.4", features = ["local"]}
 serde = "*"
+rusqlite = "*"
